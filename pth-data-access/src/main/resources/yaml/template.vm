@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="${modelName}NS">
+    <resultMap type="${model}" id="${modelName}Id">
+        #foreach($key in $columns.keySet())
+            <result column="$key" property="$columns.get($key)" jdbcType="$dbTypes.get($columns.get($key))"/>
+        #end
+    </resultMap>
+
+    <select id="selectEntity${modelName}" resultMap="${modelName}Id" parameterType="${model}">
+        select * from ${tableName}
+        where
+        <include refid="dynamic_where"/>
+        <include refid="orderby_where"/>
+        <include refid="limit_where"/>
+    </select>
+
+    <select id="selectEntity${modelName}ById" resultMap="${modelName}Id" parameterType="java.lang.Integer">
+        select * from ${tableName}
+        where ${prikey} = #{$columns.get($prikey),jdbcType=INTEGER}
+    </select>
+
+    <select id="selectEntity${modelName}ByIdList" resultMap="${modelName}Id" parameterType="java.util.List">
+        select * from ${tableName}
+        where ${prikey} in
+        <foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="selectEntityCond${modelName}" resultMap="${modelName}Id" parameterType="java.util.Map">
+        select * from ${tableName}
+        where
+        <include refid="dynamic_where"/>
+        <include refid="orderby_where"/>
+        <include refid="limit_where"/>
+    </select>
+
+    <select id="selectTotalEntityCond${modelName}" resultType="Integer" parameterType="java.util.Map">
+        select count(0) from ${tableName}
+        where
+        <include refid="dynamic_where"/>
+    </select>
+
+    <delete id="deleteEntity${modelName}" parameterType="${model}">
+        update ${tableName}
+        set removed=1,
+        utime=unix_timestamp(),
+        updater_id=#{updaterId, jdbcType=VARCHAR},
+        updater_name=#{updaterName, jdbcType=VARCHAR}
+        where ${prikey} = #{$columns.get($prikey),jdbcType=INTEGER}
+    </delete>
+
+    <insert id="insertEntity${modelName}" parameterType="${model}" useGeneratedKeys="true" keyProperty="$columns.get($prikey)">
+        insert into ${tableName}(
+        <trim suffixOverrides=",">
+            #foreach($key in $columns.keySet())
+                #if ($velocityCount != $columns.size())
+                    #if ($inDefaultValue.get($key))
+                        $key,
+                    #else
+                        <if test="$columns.get($key) != null">
+                            $key,
+                        </if>
+                    #end
+                #else
+                    #if ($inDefaultValue.get($key))
+                        $key,
+                    #else
+                        <if test="$columns.get($key) != null">
+                            $key,
+                        </if>
+                    #end
+                #end
+            #end
+        </trim>
+        )
+        values
+        (
+        <trim suffixOverrides=",">
+            #foreach($key in $columns.keySet())
+                #if ($velocityCount != $columns.size())
+                    #if ($inDefaultValue.get($key))
+                        $inDefaultValue.get($key),
+                    #else
+                        <if test="$columns.get($key) != null">
+                            #{$columns.get($key),jdbcType=$dbTypes.get($columns.get($key))},
+                        </if>
+                    #end
+                #else
+                    #if ($inDefaultValue.get($key))
+                        $inDefaultValue.get($key),
+                    #else
+                        <if test="$columns.get($key) != null">
+                            #{$columns.get($key),jdbcType=$dbTypes.get($columns.get($key))},
+                        </if>
+                    #end
+                #end
+            #end
+        </trim>
+        )
+    </insert>
+
+    <insert id="insertBatchEntity${modelName}" parameterType="java.util.List" >
+        insert into ${tableName}(
+        <trim suffixOverrides=",">
+            #foreach($key in $columns.keySet())
+                #if ($columns.get($key) != $prikey)
+                    $key,
+                #end
+            #end
+        </trim>
+        )
+        values
+        <foreach collection="list" item="item" index="index"
+                 separator=",">
+            (
+            <trim suffixOverrides=",">
+                #foreach($key in $columns.keySet())
+                    #if ($columns.get($key) != $prikey)
+                        #if ($inDefaultValue.get($key))
+                            $inDefaultValue.get($key),
+                        #else
+                            <choose>
+                                <when test="item.$columns.get($key) != null">
+                                    #{item.$columns.get($key),jdbcType=$dbTypes.get($columns.get($key))},
+                                </when>
+                                <otherwise>
+                                    #if ($dbTypes.get($columns.get($key)) == "INTEGER")
+                                        0,
+                                    #elseif ($dbTypes.get($columns.get($key)) == "VARCHAR")
+                                        '',
+                                    #else
+                                        null
+                                    #end
+                                </otherwise>
+                            </choose>
+                        #end
+                    #end
+                #end
+            </trim>
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateEntity${modelName}ById" parameterType="${model}">
+        update ${tableName}
+        <set>
+            #foreach($key in $columns.keySet())
+                #if ($columns.get($key) == $prikey)
+                #elseif ($inDefaultValue.get($key))
+                #elseif ($upDefaultValue.get($key))
+                    $key=$upDefaultValue.get($key),
+                #else
+                    <if test="$columns.get($key) != null">
+                        $key=#{$columns.get($key), jdbcType=$dbTypes.get($columns.get($key))},
+                    </if>
+                #end
+            #end
+        </set>
+        where ${prikey} = #{$columns.get($prikey),jdbcType=INTEGER}
+    </update>
+
+    <update id="updateEntity${modelName}" parameterType="java.util.Map">
+        update ${tableName}
+        <set>
+            #foreach($key in $columns.keySet())
+                #if ($upDefaultValue.get($key))
+                    $key=$upDefaultValue.get($key),
+                #else
+                    <if test="newvalue.$columns.get($key) != null">
+                        $key=#{newvalue.$columns.get($key), jdbcType=$dbTypes.get($columns.get($key))},
+                    </if>
+                #end
+            #end
+        </set>
+        where
+        <include refid="dynamic_cond"/>
+    </update>
+
+    <sql id="dynamic_cond">
+        <trim prefixOverrides="and" suffixOverrides="and">
+            #foreach($key in $columns.keySet())
+                <if test="cond.$columns.get($key) != null">
+                    and $key=#{cond.$columns.get($key), jdbcType=$dbTypes.get($columns.get($key))}
+                </if>
+            #end
+        </trim>
+    </sql>
+
+    <sql id="dynamic_where">
+        <trim prefixOverrides="and" suffixOverrides="and">
+            #foreach($key in $columns.keySet())
+                <if test="$columns.get($key) != null">
+                    and $key=#{$columns.get($key), jdbcType=$dbTypes.get($columns.get($key))}
+                </if>
+            #end
+            #foreach($key in $likes.keySet())
+                <if test="$key != null">
+                    and $likes.get($key) like "%"#{$key}"%"
+                </if>
+            #end
+        </trim>
+    </sql>
+
+
+
+    <sql id="limit_where">
+        <if test="null != offset and null != pageSize">
+            limit #{offset},#{pageSize}
+        </if>
+    </sql>
+    <sql id="orderby_where">
+        <if test="null != orderby and null != asc">
+            order by ${orderby}
+        </if>
+        <if test="null != orderby and null != desc">
+            order by ${orderby} desc
+        </if>
+    </sql>
+    <!--分割线 start-->
+
+
+    <!--分割线 end-->
+</mapper>
