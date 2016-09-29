@@ -28,6 +28,7 @@ public class BaseController {
 //    public String bugreport(String bugDesc, String exceptionDesc){
 //        String errorMsg = "快驴系统有人汇报bug了：\n" + exceptionDesc + "\n" + bugDesc;
 //        log.info(errorMsg);
+
 ////        DaxiangUtil.push("xianfu.help@meituan.com", errorMsg, "guofeipeng@meituan.com", "pengpeng04@meituan.com");
 //        return "redirect:/welcome";
 //    }
