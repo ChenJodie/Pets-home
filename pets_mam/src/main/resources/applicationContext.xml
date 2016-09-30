@@ -14,7 +14,7 @@
 
 
 	<!-- 数据库相关配置 -->
-    <!--<import resource="classpath:multi-datasource.xml"/>-->
+    <import resource="classpath:multi-datasource.xml"/>
 
     <!-- 任务列表 -->
     <task:scheduler id="myScheduler" pool-size="10" />

@@ -15,7 +15,6 @@
         <module>pth-data-access</module>
         <module>pth-common-utils</module>
         <module>pth-data-model</module>
-        <module>pth_admin</module>
         <module>pets_mam</module>
     </modules>
 

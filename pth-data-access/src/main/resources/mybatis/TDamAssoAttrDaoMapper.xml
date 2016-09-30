@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="DamAssoAttrNS">
+    <resultMap type="com.sankuai.meituan.kuailv.dam.domain.DamAssoAttr" id="DamAssoAttrId">
+        <result column="id" property="id" jdbcType="INTEGER"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="valid" property="valid" jdbcType="INTEGER"/>
+        <result column="ctime" property="ctime" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <select id="selectEntityDamAssoAttr" resultMap="DamAssoAttrId"
+            parameterType="com.sankuai.meituan.kuailv.dam.domain.DamAssoAttr">
+        select * from dam_asso_attr
+        where
+        <include refid="dynamic_where"/>
+        <include refid="orderby_where"/>
+        <include refid="limit_where"/>
+    </select>
+
+    <select id="selectEntityDamAssoAttrById" resultMap="DamAssoAttrId" parameterType="java.lang.Integer">
+        select * from dam_asso_attr
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectEntityDamAssoAttrByIdList" resultMap="DamAssoAttrId" parameterType="java.util.List">
+        select * from dam_asso_attr
+        where id in
+        <foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="selectEntityCondDamAssoAttr" resultMap="DamAssoAttrId" parameterType="java.util.Map">
+        select * from dam_asso_attr
+        where
+        <include refid="dynamic_where"/>
+        <include refid="orderby_where"/>
+        <include refid="limit_where"/>
+    </select>
+
+    <select id="selectTotalEntityCondDamAssoAttr" resultType="Integer" parameterType="java.util.Map">
+        select count(0) from dam_asso_attr
+        where
+        <include refid="dynamic_where"/>
+    </select>
+
+    <delete id="deleteEntityDamAssoAttr" parameterType="com.sankuai.meituan.kuailv.dam.domain.DamAssoAttr">
+        update dam_asso_attr
+        set removed=1,
+        utime=unix_timestamp(),
+        updater_id=#{updaterId, jdbcType=VARCHAR},
+        updater_name=#{updaterName, jdbcType=VARCHAR}
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+
+    <insert id="insertEntityDamAssoAttr" parameterType="com.sankuai.meituan.kuailv.dam.domain.DamAssoAttr"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into dam_asso_attr(
+        <trim suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="description != null">
+                description,
+            </if>
+            <if test="valid != null">
+                valid,
+            </if>
+            ctime,
+        </trim>
+        )
+        values
+        (
+        <trim suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="description != null">
+                #{description,jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null">
+                #{valid,jdbcType=INTEGER},
+            </if>
+            unix_timestamp(),
+        </trim>
+        )
+    </insert>
+
+    <insert id="insertBatchEntityDamAssoAttr" parameterType="java.util.List">
+        insert into dam_asso_attr(
+        <trim suffixOverrides=",">
+            name,
+            description,
+            valid,
+            ctime,
+        </trim>
+        )
+        values
+        <foreach collection="list" item="item" index="index"
+                 separator=",">
+            (
+            <trim suffixOverrides=",">
+                <choose>
+                    <when test="item.name != null">
+                        #{item.name,jdbcType=VARCHAR},
+                    </when>
+                    <otherwise>
+                        '',
+                    </otherwise>
+                </choose>
+                <choose>
+                    <when test="item.description != null">
+                        #{item.description,jdbcType=VARCHAR},
+                    </when>
+                    <otherwise>
+                        '',
+                    </otherwise>
+                </choose>
+                <choose>
+                    <when test="item.valid != null">
+                        #{item.valid,jdbcType=INTEGER},
+                    </when>
+                    <otherwise>
+                        0,
+                    </otherwise>
+                </choose>
+                unix_timestamp(),
+            </trim>
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateEntityDamAssoAttrById" parameterType="com.sankuai.meituan.kuailv.dam.domain.DamAssoAttr">
+        update dam_asso_attr
+        <set>
+            <if test="name != null">
+                name=#{name, jdbcType=VARCHAR},
+            </if>
+            <if test="description != null">
+                description=#{description, jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null">
+                valid=#{valid, jdbcType=INTEGER},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <update id="updateEntityDamAssoAttr" parameterType="java.util.Map">
+        update dam_asso_attr
+        <set>
+            <if test="newvalue.id != null">
+                id=#{newvalue.id, jdbcType=INTEGER},
+            </if>
+            <if test="newvalue.name != null">
+                name=#{newvalue.name, jdbcType=VARCHAR},
+            </if>
+            <if test="newvalue.description != null">
+                description=#{newvalue.description, jdbcType=VARCHAR},
+            </if>
+            <if test="newvalue.valid != null">
+                valid=#{newvalue.valid, jdbcType=INTEGER},
+            </if>
+            ctime=unix_timestamp(),
+        </set>
+        where
+        <include refid="dynamic_cond"/>
+    </update>
+
+    <sql id="dynamic_cond">
+        <trim prefixOverrides="and" suffixOverrides="and">
+            <if test="cond.id != null">
+                and id=#{cond.id, jdbcType=INTEGER}
+            </if>
+            <if test="cond.name != null">
+                and name=#{cond.name, jdbcType=VARCHAR}
+            </if>
+            <if test="cond.description != null">
+                and description=#{cond.description, jdbcType=VARCHAR}
+            </if>
+            <if test="cond.valid != null">
+                and valid=#{cond.valid, jdbcType=INTEGER}
+            </if>
+            <if test="cond.ctime != null">
+                and ctime=#{cond.ctime, jdbcType=INTEGER}
+            </if>
+        </trim>
+    </sql>
+
+    <sql id="dynamic_where">
+        <trim prefixOverrides="and" suffixOverrides="and">
+            <if test="id != null">
+                and id=#{id, jdbcType=INTEGER}
+            </if>
+            <if test="name != null">
+                and name=#{name, jdbcType=VARCHAR}
+            </if>
+            <if test="description != null">
+                and description=#{description, jdbcType=VARCHAR}
+            </if>
+            <if test="valid != null">
+                and valid=#{valid, jdbcType=INTEGER}
+            </if>
+            <if test="ctime != null">
+                and ctime=#{ctime, jdbcType=INTEGER}
+            </if>
+        </trim>
+    </sql>
+
+
+    <sql id="limit_where">
+        <if test="null != offset and null != pageSize">
+            limit #{offset},#{pageSize}
+        </if>
+    </sql>
+    <sql id="orderby_where">
+        <if test="null != orderby and null != asc">
+            order by ${orderby}
+        </if>
+        <if test="null != orderby and null != desc">
+            order by ${orderby} desc
+        </if>
+    </sql>
+</mapper>
